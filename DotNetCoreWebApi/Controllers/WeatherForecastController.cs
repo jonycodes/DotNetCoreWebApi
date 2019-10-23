@@ -50,7 +50,7 @@ namespace DotNetCoreWebApi.Controllers
                 body = await reader.ReadToEndAsync();
             }
             
-            this._logger.LogInformation(string.Format("Post Request coming from client handled by WeatherForecastController with body: {0}", body));
+            this._logger.LogInformation(string.Format("Post Request coming from client handled by WeatherForecastController with body: `{0}`", body));
             
             bool result = await this.repo.SetItem("test", body);
 
@@ -59,16 +59,17 @@ namespace DotNetCoreWebApi.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
-            string saved = await this.repo.GetItem("test");
+            string cached = await this.repo.GetItem("test");
 
-            this._logger.LogInformation(string.Format("Found object in redis {0}", saved));
+            this._logger.LogInformation(string.Format("Found object in redis: `{0}`", cached));
 
             var rng = new Random();
             var response = Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
                 TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
+                Summary = Summaries[rng.Next(Summaries.Length)],
+                Cached = cached
             })
             .ToArray();
 
